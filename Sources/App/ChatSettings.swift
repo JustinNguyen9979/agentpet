@@ -21,8 +21,8 @@ final class ChatSettings: ObservableObject {
     private static let sourceKey = "agentpet.chatSource"
     private static let customKey = "agentpet.chatCustom"
 
-    /// Moods the user can write messages for (idle = the "doing nothing" line).
-    static let editableMoods: [PetMood] = [.working, .waiting, .done, .celebrate, .idle]
+    /// Moods the user can write messages for (idle has a bubble too).
+    static let editableMoods: [PetMood] = [.idle, .working, .waiting, .done, .celebrate]
 
     /// Built-in defaults per mood; idle borrows the IdleBoost one-liners.
     /// Localized so the system message set follows the user's language.

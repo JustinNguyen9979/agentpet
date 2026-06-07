@@ -260,6 +260,54 @@ private struct GeneralTab: View {
                 }
             }
 
+            Section("Pet chat") {
+                HStack {
+                    Text("Show chat bubble")
+                    Spacer()
+                    ColorSwitch(isOn: $pet.showChat)
+                }
+                if pet.showChat {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Chat frequency")
+                            Text("Adjust how often the pet starts talking.")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Slider(value: $pet.chatProbability, in: 0...100)
+                            .frame(width: 240)
+                        Text("\(Int(pet.chatProbability))%")
+                            .monospacedDigit().foregroundStyle(.secondary).fixedSize()
+                    }
+                }
+                Picker("Messages", selection: $chat.source) {
+                    Text("System").tag(ChatSettings.Source.system)
+                    Text("Custom").tag(ChatSettings.Source.custom)
+                }
+                .pickerStyle(.segmented)
+                if chat.source == .custom {
+                    ForEach(ChatSettings.editableMoods, id: \.self) { mood in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(moodLabel(mood)).font(.caption).foregroundStyle(.secondary)
+                            GrowingTextEditor(text: Binding(
+                                get: { chat.text(for: mood) },
+                                set: { chat.setText($0, for: mood) }
+                            ))
+                            .padding(4)
+                            .background(RoundedRectangle(cornerRadius: 6).fill(Color(white: 0.16)))
+                            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.white.opacity(0.12)))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    HStack {
+                        Text("One message per line; a random one is shown.")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Reset to defaults") { chat.resetToDefaults() }
+                            .controlSize(.small)
+                    }
+                }
+            }
             Section("Sounds") {
                 SoundRow(title: "When an agent finishes",
                          enabled: $sound.doneEnabled,
@@ -617,6 +665,25 @@ private struct AnimationPicker: View {
                         }
                         .frame(width: 54, height: 44)
                         Text("Clip \(i + 1)").font(.caption2).foregroundStyle(.secondary)
+                        
+                        let currentCat = store.category(packId: pack.id, clipIndex: i)
+                        Menu {
+                            ForEach(ClipCategory.allCases, id: \.self) { cat in
+                                Button(cat.displayName) {
+                                    store.setCategory(cat, for: i, packId: pack.id)
+                                }
+                            }
+                        } label: {
+                            Text(currentCat.displayName)
+                                .font(.system(size: 8, weight: .bold))
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(categoryColor(currentCat).opacity(0.15))
+                                .foregroundStyle(categoryColor(currentCat))
+                                .clipShape(Capsule())
+                        }
+                        .menuStyle(.button)
+                        .buttonStyle(.plain)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(5)
@@ -629,6 +696,15 @@ private struct AnimationPicker: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    private func categoryColor(_ cat: ClipCategory) -> Color {
+        switch cat {
+        case .inplace: return .blue
+        case .jump: return .orange
+        case .runLeft, .runRight: return .green
+        case .runLeftAutoFlip, .runRightAutoFlip: return .purple
+        }
     }
 
     private func label(_ mood: PetMood) -> String {
