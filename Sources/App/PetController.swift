@@ -1,5 +1,6 @@
 import Foundation
 import AgentPetCore
+import ApplicationServices
 
 /// Resolves the aggregate session mood, plays a short `celebrate` burst when
 /// work finishes, owns the selected (imported) pet, and drives the chat bubble.
@@ -40,6 +41,23 @@ final class PetController: ObservableObject {
             scheduleChat()
         }
     }
+    /// Whether the pet dodges the mouse cursor.
+    @Published var dodgeMouse: Bool {
+        didSet { UserDefaults.standard.set(dodgeMouse, forKey: Self.dodgeMouseKey) }
+    }
+    /// Whether the pet dodges the text cursor (caret).
+    @Published var dodgeTextCursor: Bool {
+        didSet {
+            UserDefaults.standard.set(dodgeTextCursor, forKey: Self.dodgeTextCursorKey)
+            if dodgeTextCursor {
+                checkAndPromptAccessibility()
+            }
+        }
+    }
+    /// Sensitivity range for dodging (0% to 100%).
+    @Published var dodgeSensitivity: Double {
+        didSet { UserDefaults.standard.set(dodgeSensitivity, forKey: Self.dodgeSensitivityKey) }
+    }
 
     static let minPoint: Double = 60
     static let maxPoint: Double = 240
@@ -74,6 +92,9 @@ final class PetController: ObservableObject {
     private static let idleMsgKey = "agentpet.showIdleMessage"
     private static let chatProbabilityKey = "agentpet.chatProbability"
     private static let sizeKey = "agentpet.petSize"
+    private static let dodgeMouseKey = "agentpet.dodgeMouse"
+    private static let dodgeTextCursorKey = "agentpet.dodgeTextCursor"
+    private static let dodgeSensitivityKey = "agentpet.dodgeSensitivity"
     private static let celebrateDuration: TimeInterval = 3
 
     init() {
@@ -84,6 +105,10 @@ final class PetController: ObservableObject {
         chatProbability = min(max(savedProb, 0.0), 100.0)
         let saved = UserDefaults.standard.object(forKey: Self.sizeKey) as? Double ?? 120
         petPoint = min(max(saved, Self.minPoint), Self.maxPoint)
+        dodgeMouse = (UserDefaults.standard.object(forKey: Self.dodgeMouseKey) as? Bool) ?? true
+        dodgeTextCursor = (UserDefaults.standard.object(forKey: Self.dodgeTextCursorKey) as? Bool) ?? false
+        let savedSensitivity = UserDefaults.standard.object(forKey: Self.dodgeSensitivityKey) as? Double ?? 100.0
+        dodgeSensitivity = min(max(savedSensitivity, 0.0), 100.0)
     }
 
     func start() {
@@ -302,6 +327,12 @@ final class PetController: ObservableObject {
             chatLine = active.map { "• \(TickerFormatter.line(for: $0))" }.joined(separator: "\n")
         }
         StatusBarController.shared.refreshTitle()
+    }
+
+    func checkAndPromptAccessibility() {
+        let options = ["AXTrustedCheckOptionPrompt" as CFString: true] as CFDictionary
+        _ = AXIsProcessTrustedWithOptions(options)
+    }
     }
 }
 
