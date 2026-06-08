@@ -453,9 +453,12 @@ final class PetWindowController: ObservableObject {
 
         let speed: CGFloat = isDodging ? 6.0 : 3.0
         var newX = panel.frame.minX + wanderDirection * speed
-        let margin: CGFloat = 16
-        let minX = screen.minX + margin
-        let maxX = screen.maxX - panel.frame.width - margin
+        
+        let petPoint = CGFloat(PetController.shared.petPoint)
+        let petOffset = (panel.frame.width - petPoint) / 2
+        let margin: CGFloat = 0
+        let minX = screen.minX - petOffset + margin
+        let maxX = screen.maxX - panel.frame.width + petOffset - margin
 
         if isDodging {
             // If dodging, we run up to the wall and stay there. Do not bounce back towards the source!
