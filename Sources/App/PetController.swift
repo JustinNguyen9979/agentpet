@@ -333,7 +333,6 @@ final class PetController: ObservableObject {
         let options = ["AXTrustedCheckOptionPrompt" as CFString: true] as CFDictionary
         _ = AXIsProcessTrustedWithOptions(options)
     }
-    }
 }
 
 /// Built-in (system) chat lines per mood.

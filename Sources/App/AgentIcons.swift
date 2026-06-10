@@ -48,7 +48,7 @@ enum AgentIcons {
         case .windsurf:  return windsurfSVG
         case .opencode:  return opencodeSVG
         // Antigravity ships as a PNG (its SVG uses blur filters macOS can't render).
-        case .antigravity, .cli, .unknown: return nil
+        case .antigravity, .hermes, .cli, .unknown: return nil
         }
     }
 

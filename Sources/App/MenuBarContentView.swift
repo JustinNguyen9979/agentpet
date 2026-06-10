@@ -45,12 +45,23 @@ struct MenuContentView: View {
                 .frame(width: 28, height: 28)
                 .overlay(Image(systemName: "pawprint.fill").font(.system(size: 13)).foregroundStyle(.white))
             VStack(alignment: .leading, spacing: 1) {
-                Text("AgentPet").font(.system(size: 14, weight: .bold)).foregroundStyle(.white)
+                HStack(spacing: 6) {
+                    Text("AgentPet").font(.system(size: 14, weight: .bold)).foregroundStyle(.white)
+                    Text(appVersion)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.35))
+                }
                 Text(subtitle).font(.system(size: 11)).foregroundStyle(.white.opacity(0.5))
             }
             Spacer()
         }
         .padding(14)
+    }
+
+    private var appVersion: String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "v\(v) (\(b))"
     }
 
     private var subtitle: String {

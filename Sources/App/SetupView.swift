@@ -117,13 +117,6 @@ private struct TabButton: View {
 // MARK: - About
 
 private struct AboutTab: View {
-    @Environment(\.openURL) private var openURL
-
-    private let repo = URL(string: "https://github.com/ntd4996/agentpet")!
-    private let profile = URL(string: "https://github.com/ntd4996")!
-    private let coffee = URL(string: "https://buymeacoffee.com/ntd4996")!
-    private let discord = URL(string: "https://discord.gg/kzFJKsZav")!
-
     var body: some View {
         Form {
             Section {
@@ -137,51 +130,8 @@ private struct AboutTab: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
             }
-
-            Section {
-                Button { openURL(repo) } label: {
-                    Label("Star on GitHub", systemImage: "star.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(Color.systemAccent)
-                .controlSize(.large)
-
-                Button { openURL(discord) } label: {
-                    Label("Join the Discord", systemImage: "bubble.left.and.bubble.right.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .controlSize(.large)
-
-                Button { openURL(coffee) } label: {
-                    Label("Buy me a coffee", systemImage: "cup.and.saucer.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .controlSize(.large)
-            } footer: {
-                Text("If AgentPet helps your workflow, a star means a lot. Thank you!")
-            }
-
-            Section("Author") {
-                Link(destination: profile) {
-                    Label("Nguyễn Thành Đạt (@ntd4996)", systemImage: "person.crop.circle")
-                }
-                Link(destination: repo) {
-                    Label("github.com/ntd4996/agentpet", systemImage: "chevron.left.forwardslash.chevron.right")
-                }
-            }
-
-            Section("About") {
-                LabeledContent("Version", value: appVersion)
-            }
         }
         .formStyle(.grouped)
-    }
-
-    private var appVersion: String {
-        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
-        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
-        return "\(v) (\(b))"
     }
 }
 
@@ -226,9 +176,20 @@ private struct GeneralTab: View {
     @ObservedObject var model: SettingsModel
     @ObservedObject var pet: PetController
     @ObservedObject private var sound = SoundSettings.shared
+    @ObservedObject private var chat = ChatSettings.shared
     // Local mirror of the system login-item state so the toggle re-renders
     // reliably (the SMAppService status isn't observable on its own).
     @State private var launchAtLogin = LoginItem.isEnabled
+
+    private func moodLabel(_ mood: PetMood) -> String {
+        switch mood {
+        case .idle:       return "Idle"
+        case .working:    return "Working"
+        case .waiting:    return "Waiting"
+        case .done:       return "Done"
+        case .celebrate:  return "Celebrate"
+        }
+    }
 
     var body: some View {
         Form {
